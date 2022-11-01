@@ -5,18 +5,67 @@
  *      Author: mdlm
  */
 
-//includes
 #include "json.h"
-#include "gpio.h"
 
-void handleLED(void);
 
 /* LwJSON instance and tokens */
 static lwjson_token_t tokens[128];
 static lwjson_t lwjson;
 
 
-//for()
+
+
+
+Jsonda* jsonda_arr = 0;
+int ctr = 0;
+void add_device(char* name, enum Emech type){
+	ctr++;
+	jsonda_arr = (Jsonda*) realloc(jsonda_arr, ctr * sizeof(Jsonda));
+	switch(type){
+	case stepMotor:
+		  jsonda_arr[ctr-1].name = name;
+		  jsonda_arr[ctr-1].param_len = 3;
+		  jsonda_arr[ctr-1].params[0] = "RPM";
+		  jsonda_arr[ctr-1].params[1] = "dist";
+		  jsonda_arr[ctr-1].params[2] = "dir";
+		break;
+	case led:
+		  jsonda_arr[ctr-1].name = name;
+		  jsonda_arr[ctr-1].param_len = 1;
+		  jsonda_arr[ctr-1].params[0] = "toggles";
+		break;
+	}
+
+}
+
+void send_dev_info(int x){
+	char somechar[300] = {0};
+	char* p = somechar;
+	p += sprintf(p, "[{\"type\":\"%s\"", jsonda_arr[x].name);
+	p += sprintf(p,", \"params\":[");
+	for( int i = 0; i<jsonda_arr[x].param_len; i++){
+		p += sprintf(p, "{\"name\": \"%s\"}", jsonda_arr[x].params[i]);
+		if(i < jsonda_arr[x].param_len-1){
+			p += sprintf(p, ", ");
+		}
+		else{
+			p += sprintf(p, "]}]");
+		}
+	}
+
+	send_msg(ip_current_src_addr(), server_port, somechar);
+
+}
+
+    //sprintf(somechar, "{\"type\":\"step motor\", \"params\":[{\"name\":\"RPM\", \"rangeMin\":%d, \"rangeMax\":%d}, {\"name\":\"dist\", \"rangeMin\":%d,"
+    		//" \"rangeMax\":%d},{\"name\":\"dir\", \"rangeMin\":%d, \"rangeMax\":%d}]}]", eMecha.RPM.min, eMecha.RPM.max, eMecha.dist.min, eMecha.dist.max, eMecha.dir.min, eMecha.dir.max);
+   // char somechar[300] = {0};
+
+
+
+
+
+
 
 
 
@@ -31,23 +80,23 @@ void jsonHandler(char jsarray[]) {
     		if((t = lwjson_find(&lwjson, "command")) !=NULL ){
     			const char* command = lwjson_get_val_string(t, (size_t*)&t->u.str.token_value_len);
 
-#if (STEPMOTOR == 1)
+
 				if(strncmp(command, "StepM",strlen("StepM"))==0){
 					snprintf(rota, strlen("Command:  ")+strlen("StepM")+1, "Command:  %s", command); // +1 da %s tager en plads
 					send_msg(ip_current_src_addr(), server_port, rota);
 
 					handleRunMotor();
 					}
-#endif
-#if ( PUMPMOTOR == 1)
-				if(strncmp(command, "runPumpMotor",strlen("runPumpMotor"))==0){
+
+
+				else if(strncmp(command, "runPumpMotor",strlen("runPumpMotor"))==0){
 					snprintf(rota, strlen("Command:  ")+strlen("runStepMotor")+1, "Command:  %s", command);
 					send_msg(ip_current_src_addr(), server_port, rota);
 					//næste funktion
 				}
-#endif
-#if ( LED == 1)
-				if(strncmp(command, "LEDinit",strlen("LED"))==0){
+
+
+				else if(strncmp(command, "LEDinit",strlen("LED"))==0){
 					snprintf(rota, strlen("Command:  ")+strlen("LED")+1, "Command:  %s", command);
 					send_msg(ip_current_src_addr(), server_port, rota);
 					//næste funktion
@@ -55,7 +104,7 @@ void jsonHandler(char jsarray[]) {
 					handleLED();
 
 				}
-#endif
+
 				else{
 					send_msg(ip_current_src_addr(), server_port, "No such command available on this board");
 				}
@@ -68,7 +117,7 @@ void jsonHandler(char jsarray[]) {
 }
 
 
-#if (STEPMOTOR == 1)
+
 
 void handleRunMotor(void){
 
@@ -79,6 +128,7 @@ void handleRunMotor(void){
 	if((t = lwjson_find(&lwjson, "_params.RPM")) != NULL){
 		calcPeriod(lwjson_get_val_int(t));
 		sprintf(rota, "Key found with data. RPM: %d", (int)lwjson_get_val_int(t));
+		sprintf(rota, *rota + " type: %s", t->type);
 		send_msg(ip_current_src_addr(), server_port, rota);
 	}
 
@@ -97,7 +147,7 @@ void handleRunMotor(void){
 
 }
 
-#endif
+
 
 #if ( LED == 1 )
 void handleLED(void){

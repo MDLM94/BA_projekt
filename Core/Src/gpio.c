@@ -35,7 +35,7 @@ static          ADI_CB gpfIntCallback = NULL;
 static void     *gpIntCBParam = NULL;
 /* USER CODE END 0 */
 uint rot_cnt = 0;
-char rota[40];
+char rota[200];
 
 bool stop_IT_flag = false;
 /*----------------------------------------------------------------------------*/

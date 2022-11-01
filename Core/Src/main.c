@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "udp_tester.h"
 #include "tim.h"
 #include "gpio.h"
 //#include "Boardsupport.h"
@@ -28,6 +27,8 @@
 #include "lwIP_adin2111_app.h"
 #include "lwip/timeouts.h"
 #include "tcp_server.h"
+#include "json.h"
+#include "udp_tester.h"
 /* USER CODE END Includes */
 
  // TIM_HandleTypeDef htim1;
@@ -64,6 +65,7 @@
 
 /* USER CODE END 0 */
 
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -80,6 +82,7 @@ int main(void)
   LwIP_ADIN2111_t myConn;
   board_t boardDetails;
 
+
   /****** System Init *****/
   error = BSP_InitSystem();
   DEBUG_RESULT("BSP_InitSystem", error, 0);
@@ -91,12 +94,12 @@ int main(void)
   boardDetails.mac[2] =	0x22;
   boardDetails.mac[3] =	0xFE;
   boardDetails.mac[4] =	0xDA;
-  boardDetails.mac[5] =	0xB9; //0xC9 for 2nd board
+  boardDetails.mac[5] =	0xC9; //0xC9 for 2nd board
 
   boardDetails.ip_addr[0] =   192;
   boardDetails.ip_addr[1] =   168;
   boardDetails.ip_addr[2] =   1;
-  boardDetails.ip_addr[3] =   123; //123 for 2nd board
+  boardDetails.ip_addr[3] =   124; //123 for 2nd board
 
   boardDetails.net_mask[0] =  255;
   boardDetails.net_mask[1] =  255;
@@ -128,6 +131,12 @@ int main(void)
   MX_TIM5_Init();
 
   //ReturnToZero();
+/*add_device(io7, io9, tim2){
+ *				}
+ */
+ add_device("step motor", stepMotor);
+ add_device("LED", led);
+
 
   while (1)
   {

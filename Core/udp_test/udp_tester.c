@@ -73,6 +73,7 @@ char toggle_cnt[15];
 void direction(u8_t dir);
 void calcPeriod(u16_t RPM);
 void send_msg(const ip_addr_t *addr, u16_t port, const char *str);
+
 //void delay(uint16_t us);
 //static struct tftp_state tftp_state;
 
@@ -170,19 +171,22 @@ typedef struct {
 
 
 
+
+
 static void
 recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
 
+	int cnter = 0;
 	ip_addr_t toaddr;
-	toaddr.addr = 0x7E01a8c0;
-	//adresse = p->payload;
+	toaddr.addr = 0xff01a8c0;
     jsonlen = p->len;
 
 	UdpPack *sbuf = (UdpPack*) p->payload;
 
-	char jsonfile[p->len+1];
-	snprintf(jsonfile, p->len+1, "%s", p->payload);
+	char jsonfile[p->len +1];
+	snprintf(jsonfile, p->len, "%s", (char*)p->payload);
+	jsonfile[p->len] = 0;
     str_ptr = p->payload;
 
 	cntr = 0;
@@ -195,16 +199,19 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 
     int* checkip = ip_current_src_addr();
 
-   if(ip_addr_isbroadcast(ip_current_dest_addr(), ip_current_netif()) == 1){
-		#if (STEPMOTOR == 1 && LED == 1)
-	   	   send_msg(addr, 73, "0, 1");
-		#elif (LED == 1)
-          send_msg(addr, 73, "0");
-		#elif (STEPMOTOR == 1)
-          send_msg(addr, 73, "1");
-		#else
-          send_msg(addr, 73, "-1");
-		#endif
+
+
+
+
+    if(ip_addr_isbroadcast(ip_current_dest_addr(), ip_current_netif()) == 1){
+    	for(int i = 0; i < ctr; i++){
+    		send_dev_info(i);
+    	}
+
+
+      //      send_msg(addr, 73, InitBoardMsg);
+            //send_msg(addr, 73, somechar);
+
    }
    else if(*checkip == 2114037952){
 	   jsonHandler(jsonfile);
@@ -263,36 +270,6 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 }
 
 
-/*static void
-tftp_tmr(void *arg)
-{
-  LWIP_UNUSED_ARG(arg);
-
- tftp_state.timer++;
-
- if (tftp_state.handle == NULL) {
-    return;
-  }
- sys_timeout(TFTP_TIMER_MSECS, tftp_tmr, NULL);
-
- if ((tftp_state.timer - tftp_state.last_pkt) > (TFTP_TIMEOUT_MSECS / TFTP_TIMER_MSECS)) {
-    if ((tftp_state.last_data != NULL) && (tftp_state.retries < TFTP_MAX_RETRIES)) {
-      LWIP_DEBUGF(TFTP_DEBUG | LWIP_DBG_STATE, ("tftp: timeout, retrying\n"));*/
-      //resend_data();
-     /* tftp_state.retries++;
-    } else {
-      LWIP_DEBUGF(TFTP_DEBUG | LWIP_DBG_STATE, ("tftp: timeout\n"));
-      close_handle();
-    }
-  }
-}*/
-
-
-
-/** @ingroup tftp
-* Initialize TFTP server.
-* @param ctx TFTP callback struct
-*/
 err_t
 tftp_init()
 {
@@ -310,28 +287,12 @@ tftp_init()
     return ret;
   }
 
- //tftp_state.handle    = NULL;
-  //tftp_state.port      = 0;
-  //tftp_state.ctx       = ctx;
-  //tftp_state.timer     = 0;
-  //tftp_state.last_data = NULL;
-  //tftp_state.upcb      = pcb;
  data_struct.upcb = pcb;
  udp_recv(pcb, recv, NULL);
 
  return ERR_OK;
 }
 
-/** @ingroup tftp
-* Deinitialize ("turn off") TFTP server.
-*/
-/*void tftp_cleanup(void)
-{
-  LWIP_ASSERT("Cleanup called on non-initialized TFTP", tftp_state.upcb != NULL);
-  udp_remove(tftp_state.upcb);
-  close_handle();
-  memset(&tftp_state, 0, sizeof(tftp_state));
-}*/
 
 
 void direction(u8_t dir)
