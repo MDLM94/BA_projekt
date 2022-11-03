@@ -7,6 +7,14 @@
 
 #include "json.h"
 
+//using namespace std;
+//#include "string.h"
+//#include ""
+
+/*
+#ifndef __cplusplus
+  //#error
+#endif*/
 
 /* LwJSON instance and tokens */
 static lwjson_token_t tokens[128];

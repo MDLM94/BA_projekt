@@ -20,6 +20,7 @@
 #include "main.h"
 #include "tim.h"
 #include "gpio.h"
+
 //#include "Boardsupport.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -140,6 +141,7 @@ int main(void)
 
   while (1)
   {
+	  int cppmain();
 
     /* USER CODE END WHILE */
       uint32_t now  = BSP_SysNow();

@@ -49,7 +49,7 @@ extern "C" {
 /* USER CODE BEGIN EM */
 
 /* USER CODE END EM */
-
+int cppmain();
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 

@@ -31,13 +31,19 @@ typedef struct{
 
 }Jsonda;
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void add_device(char* name, enum Emech type);
 void jsonHandler(char jsarray[]);
 void handleRunMotor(void);
 void handleLED(void);
 void send_dev_info(int x);
+
+#ifdef __cplusplus
+}
+#endif
 
 
 extern int ctr;
