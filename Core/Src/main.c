@@ -135,8 +135,8 @@ int main(void)
 /*add_device(io7, io9, tim2){
  *				}
  */
- add_device("step motor", stepMotor);
- add_device("LED", led);
+ //add_device("step motor", stepMotor);
+ //add_device("LED", led);
 
 
   while (1)

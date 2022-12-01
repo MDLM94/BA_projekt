@@ -16,26 +16,26 @@
 #include "math.h"
 #include "ports.h"
 #include "gpio.h"
-
-enum Emech{
+/*
+extern enum Emech{
 		stepMotor,
 		pumpMotor,
 		led,
-};
-
+};*/
+/*
 typedef struct{
 	char* name;
 	enum Emech type;
 	int param_len;
 	char* params[10];
 
-}Jsonda;
+}Jsonda;*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void add_device(char* name, enum Emech type);
+//void add_device(char* name, enum Emech type);
 void jsonHandler(char jsarray[]);
 void handleRunMotor(void);
 void handleLED(void);

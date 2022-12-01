@@ -24,8 +24,9 @@ static lwjson_t lwjson;
 
 
 
-Jsonda* jsonda_arr = 0;
+//Jsonda* jsonda_arr = 0;
 int ctr = 0;
+/*
 void add_device(char* name, enum Emech type){
 	ctr++;
 	jsonda_arr = (Jsonda*) realloc(jsonda_arr, ctr * sizeof(Jsonda));
@@ -45,7 +46,9 @@ void add_device(char* name, enum Emech type){
 	}
 
 }
+*/
 
+/*
 void send_dev_info(int x){
 	char somechar[300] = {0};
 	char* p = somechar;
@@ -63,7 +66,7 @@ void send_dev_info(int x){
 
 	send_msg(ip_current_src_addr(), server_port, somechar);
 
-}
+}*/
 
     //sprintf(somechar, "{\"type\":\"step motor\", \"params\":[{\"name\":\"RPM\", \"rangeMin\":%d, \"rangeMax\":%d}, {\"name\":\"dist\", \"rangeMin\":%d,"
     		//" \"rangeMax\":%d},{\"name\":\"dir\", \"rangeMin\":%d, \"rangeMax\":%d}]}]", eMecha.RPM.min, eMecha.RPM.max, eMecha.dist.min, eMecha.dist.max, eMecha.dir.min, eMecha.dir.max);

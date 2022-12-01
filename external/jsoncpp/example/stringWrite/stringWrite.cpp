@@ -12,13 +12,15 @@
  *     }
  * }
  */
-int main() {
+int maincpp() {
   Json::Value root;
   Json::Value data;
   constexpr bool shouldUseOldWay = false;
   root["action"] = "run";
   data["number"] = 1;
   root["data"] = data;
+  root[0] = "hej";
+  root[1] = "Fuck";
 
   if (shouldUseOldWay) {
     Json::FastWriter writer;

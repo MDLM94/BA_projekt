@@ -89,30 +89,13 @@ struct data_struct{
 static struct data_struct data_struct;
 
 
-/*static void
-close_handle(void)
-{
-  tftp_state.port = 0;
-  ip_addr_set_any(0, &tftp_state.addr);
 
- if (tftp_state.last_data != NULL) {
-    pbuf_free(tftp_state.last_data);
-    tftp_state.last_data = NULL;
-  }
-
- sys_untimeout(tftp_tmr, NULL);
-
- if (tftp_state.handle) {
-    tftp_state.ctx->close(tftp_state.handle);
-    tftp_state.handle = NULL;
-    LWIP_DEBUGF(TFTP_DEBUG | LWIP_DBG_STATE, ("tftp: closing\n"));
-  }
-}*/
 
 u32_t test_addr = 2114037952; //126.1.168.192
 u32_t *aptr = &test_addr;
 u16_t test_port = 73;
 
+/*
 ///////////////////////////////////////////////////////////////
 void send_test_msg(u32_t *t_address, u16_t t_port, char *str){
   int str_length = strlen(str);
@@ -133,7 +116,7 @@ void send_test_msg(u32_t *t_address, u16_t t_port, char *str){
 }
 
 /////////////////////////////////////////////////////////////
-
+*/
 void send_msg(const ip_addr_t *addr, u16_t port, const char *str)
 {
 
@@ -167,20 +150,13 @@ typedef struct {
     u16_t value;
 } UdpPack;
 
-
-
-
-
-
-
-
 static void
 recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
 
-	int cnter = 0;
-	ip_addr_t toaddr;
-	toaddr.addr = 0xff01a8c0;
+	// int cnter = 0;
+	// ip_addr_t toaddr;
+	// toaddr.addr = 0xff01a8c0;
     jsonlen = p->len;
 
 	UdpPack *sbuf = (UdpPack*) p->payload;
@@ -196,8 +172,8 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
     LWIP_UNUSED_ARG(arg);
     LWIP_UNUSED_ARG(upcb);
 
-    int bla = 0;
-     bla = maincpp();
+    //int bla;
+    maincpp();
 
     int* checkip = ip_current_src_addr();
 
@@ -206,9 +182,30 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 
 
     if(ip_addr_isbroadcast(ip_current_dest_addr(), ip_current_netif()) == 1){
-    	for(int i = 0; i < ctr; i++){
-    		send_dev_info(i);
-    	}
+    	//for(int i = 0; i < ctr; i++){
+    		//send_dev_info(1);
+    	//add_dev("stepM");
+    	//add_dev("stepM");
+    	//add_dev("stepM");
+    	//add_dev("stepM");
+    	//add_dev("stepM");
+
+    	//add_dev("Led");
+    	//add_dev("Led");
+
+    	char* cJsonArray;
+    	cJsonArray = sendB_info(1);
+
+     	send_msg(addr, 73, cJsonArray);
+
+
+    	free(cJsonArray);
+
+    	// HUSK DEALLOC
+
+
+
+    	//}
 
 
       //      send_msg(addr, 73, InitBoardMsg);
@@ -253,7 +250,7 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 		}
 		else if(sbuf -> addrr == 9){
 			sprintf(rota, "48 MHz timer count : %lu", __HAL_TIM_GET_COUNTER(&htim5));
-			send_test_msg(aptr, test_port, rota);
+			send_msg(addr, port, rota);
 			HAL_TIM_Base_Stop(&htim5);
 			__HAL_TIM_SET_COUNTER(&htim5, 0);
 			 HAL_TIM_Base_Stop_IT(&htim2);
