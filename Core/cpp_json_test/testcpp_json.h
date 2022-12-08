@@ -5,7 +5,8 @@ extern "C" {
 extern char jsonArray[];
 int maincpp();
 //int add_dev(char* devName);
-char* sendB_info(int b_nr);
+char* makeCharB_info(int b_nr);
+char* makeCharMsg(char msg[]);
 
 
 
