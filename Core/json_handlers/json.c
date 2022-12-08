@@ -6,6 +6,7 @@
  */
 
 #include "json.h"
+#include "testcpp_json.h"
 
 //using namespace std;
 //#include "string.h"
@@ -94,7 +95,7 @@ void jsonHandler(char jsarray[]) {
 
 				if(strncmp(command, "StepM",strlen("StepM"))==0){
 					snprintf(rota, strlen("Command:  ")+strlen("StepM")+1, "Command:  %s", command); // +1 da %s tager en plads
-					send_msg(ip_current_src_addr(), server_port, rota);
+					send_msg(ip_current_src_addr(), server_port, makeCharMsg(rota));
 
 					handleRunMotor();
 					}
@@ -102,14 +103,15 @@ void jsonHandler(char jsarray[]) {
 
 				else if(strncmp(command, "runPumpMotor",strlen("runPumpMotor"))==0){
 					snprintf(rota, strlen("Command:  ")+strlen("runStepMotor")+1, "Command:  %s", command);
-					send_msg(ip_current_src_addr(), server_port, rota);
+					send_msg(ip_current_src_addr(), server_port, makeCharMsg(rota));
 					//næste funktion
 				}
 
 
 				else if(strncmp(command, "LEDinit",strlen("LED"))==0){
 					snprintf(rota, strlen("Command:  ")+strlen("LED")+1, "Command:  %s", command);
-					send_msg(ip_current_src_addr(), server_port, rota);
+					char msg = makeCharMsg(rota);
+					send_msg(ip_current_src_addr(), server_port, msg);
 					//næste funktion
 
 					handleLED();

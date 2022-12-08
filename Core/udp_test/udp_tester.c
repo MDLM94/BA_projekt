@@ -173,7 +173,7 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
     LWIP_UNUSED_ARG(upcb);
 
     //int bla;
-    maincpp();
+    //maincpp();
 
     int* checkip = ip_current_src_addr();
 
@@ -182,34 +182,18 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 
 
     if(ip_addr_isbroadcast(ip_current_dest_addr(), ip_current_netif()) == 1){
-    	//for(int i = 0; i < ctr; i++){
-    		//send_dev_info(1);
-    	//add_dev("stepM");
-    	//add_dev("stepM");
-    	//add_dev("stepM");
-    	//add_dev("stepM");
-    	//add_dev("stepM");
 
-    	//add_dev("Led");
-    	//add_dev("Led");
+    	//char* cJsonArray;
+    	//cJsonArray = sendB_info(1);
 
-    	char* cJsonArray;
-    	cJsonArray = sendB_info(1);
-
-     	send_msg(addr, 73, cJsonArray);
+     	send_msg(addr, 73, makeCharB_info(1));
 
 
-    	free(cJsonArray);
+    	//free(cJsonArray);
 
     	// HUSK DEALLOC
 
 
-
-    	//}
-
-
-      //      send_msg(addr, 73, InitBoardMsg);
-            //send_msg(addr, 73, somechar);
 
    }
    else if(*checkip == 2114037952){
@@ -243,14 +227,14 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 		else if(sbuf -> addrr == 4){
 			//__HAL_TIM_GET_COUNTER(&htim5);
 			sprintf(rota, "Rotations : %lu", __HAL_TIM_GET_COUNTER(&htim5));
-			send_msg(addr, port, rota);
+			//send_msg(addr, port, sendMsg(rota));
 			HAL_TIM_Base_Stop(&htim5);
 			__HAL_TIM_SET_COUNTER(&htim5, 0);
 
 		}
 		else if(sbuf -> addrr == 9){
 			sprintf(rota, "48 MHz timer count : %lu", __HAL_TIM_GET_COUNTER(&htim5));
-			send_msg(addr, port, rota);
+			//send_msg(addr, port, sendMsg(rota));
 			HAL_TIM_Base_Stop(&htim5);
 			__HAL_TIM_SET_COUNTER(&htim5, 0);
 			 HAL_TIM_Base_Stop_IT(&htim2);

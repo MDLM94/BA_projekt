@@ -51,11 +51,47 @@ int add_dev(char* devName){
 }
 */
 
-char* sendB_info(int b_nr/*, std::string b_name*/){
+/* Til at tilføje devices i main
+Json::Value AddDevice(std::string name)
+{
+	return devices["devices"][name];
+}
+*/
+
+char* makeCharMsg(char msg[]/*, std::string b_name*/){
+
 	std::string json_file;
 
 //	  Json::Value board;
+	Json::Value board;
     Json::Value devices;
+
+    board["msgType"] = 1;
+
+	board["payload"] = msg;
+
+
+
+	Json::FastWriter writer;
+	json_file = writer.write(board);
+
+
+	//lednr = 0;
+	return strdup( json_file.c_str());
+
+
+}
+
+char* makeCharB_info(int b_nr/*, std::string b_name*/){
+
+	std::string json_file;
+
+//	  Json::Value board;
+	Json::Value board;
+    Json::Value devices;
+
+    board["msgType"] = 23;
+
 //    Json::Value b_Info;
 //    Json::Value b_name;
 //    Json::Value b_ID;
@@ -71,10 +107,30 @@ char* sendB_info(int b_nr/*, std::string b_name*/){
     devices["b_id"] = b_nr;
     //devices["b_IP"] = "192.168.1.123";
 
+    //JValue::Value device = addDevice("type");
+
+
+    /*
+    JSon::Value info;
+    info["name"] = "fdfd";
+
+    device.Append(info);
+    */
 	devices["devices"]["stepMs"][0]["name"] = "Liverpool";
 	devices["devices"]["stepMs"][0]["dev_nr"] = 1;
 	devices["devices"]["stepMs"][0]["min_max"][0] = 1;
 	devices["devices"]["stepMs"][0]["min_max"][1] = 2500;
+
+	devices["devices"]["stepMs"][1]["name"] = "København";
+	devices["devices"]["stepMs"][1]["dev_nr"] = 2;
+	devices["devices"]["stepMs"][1]["min_max"][0] = 1;
+	devices["devices"]["stepMs"][1]["min_max"][1] = 2500;
+
+	devices["devices"]["stepMs"][2]["name"] = "Arsenal";
+	devices["devices"]["stepMs"][2]["dev_nr"] = 3;
+	devices["devices"]["stepMs"][2]["min_max"][0] = 1;
+	devices["devices"]["stepMs"][2]["min_max"][1] = 2500;
+
 /*
 	devices["devices"]["stepMs"][1]["name"] = "Arsenal";
 	devices["devices"]["stepMs"][1]["dev_nr"] = 1;
@@ -82,24 +138,21 @@ char* sendB_info(int b_nr/*, std::string b_name*/){
 	devices["devices"]["stepMs"][1]["min_max"][1] = 2500;
 	*/
 
-	devices["devices"]["Leds"][0]["name"] = "Liverpool";
-	devices["devices"]["Leds"][0]["dev_nr"] = 1;
-	devices["devices"]["Leds"][0]["min_max"][0] = 1;
-	devices["devices"]["Leds"][0]["min_max"][1] = 2500;
-/*
-	devices["devices"]["Leds"][1]["name"] = "Liverpool";
-	devices["devices"]["Leds"][1]["dev_nr"] = 1;
+	devices["devices"]["leds"][0]["name"] = "Manchester";
+	devices["devices"]["leds"][0]["dev_nr"] = 1;
+	devices["devices"]["leds"][0]["min_max"][0] = 1;
+	devices["devices"]["leds"][0]["min_max"][1] = 2500;
+
+	devices["devices"]["Leds"][1]["name"] = "Aarhus";
+	devices["devices"]["Leds"][1]["dev_nr"] = 2;
 	devices["devices"]["Leds"][1]["min_max"][0] = 1;
 	devices["devices"]["Leds"][1]["min_max"][1] = 2500;
 
-	devices["devices"]["Leds"][2]["name"] = "Liverpool";
-	devices["devices"]["Leds"][2]["dev_nr"] = 1;
-	devices["devices"]["Leds"][2]["min_max"][0] = 1;
-	devices["devices"]["Leds"][2]["min_max"][1] = 2500;
-*/
+
+
 //	board["Devices"] = devices;
 	//board["B_info"] = b_Info;
-
+	board["payload"] = devices;
 
 //	devices["leds"]["away"]["code"] = 89223;
 //	devices["competitors"]["away"]["name"] = "Aston Villa";
@@ -107,7 +160,7 @@ char* sendB_info(int b_nr/*, std::string b_name*/){
 
 
 	Json::FastWriter writer;
-	json_file = writer.write(devices);
+	json_file = writer.write(board);
 
 
 	//lednr = 0;
@@ -116,7 +169,7 @@ char* sendB_info(int b_nr/*, std::string b_name*/){
 
 }
 
-int maincpp() {
+//int maincpp() {
   //constexpr bool shouldUseOldWay = true;
   /*
   Json::Value root;
@@ -180,6 +233,6 @@ int maincpp() {
   /*for (int i = 0; i < n; i++)
 	  std::cout << jsonArray[i];
 	*/
-  return EXIT_SUCCESS;
-}
+  //return EXIT_SUCCESS;
+//}
 
