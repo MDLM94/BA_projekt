@@ -10,6 +10,7 @@
 #include "lwip/timeouts.h"
 #include "lwip/debug.h"
 
+#include "ports.h"
 
 #ifdef __cplusplus
 extern "C" {

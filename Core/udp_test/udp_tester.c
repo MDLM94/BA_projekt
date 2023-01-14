@@ -2,10 +2,7 @@
 #include "testcpp_json.h"
 
 #if LWIP_UDP
-#include "ports.h"
-#include "lwip/udp.h"
 #include "lwip/timeouts.h"
-#include "lwip/debug.h"
 #include "gpio.h"
 #include "tim.h"
 #include "math.h"
@@ -71,6 +68,7 @@ int globalRot = 0;
 int toggles = 0;
 char toggle_cnt[15];
 //void send_msg(const ip_addr_t *addr, u16_t port, const char *str);
+void blinkLED(int blinks);
 void direction(u8_t dir);
 void calcPeriod(u16_t RPM);
 void send_msg(const ip_addr_t *addr, u16_t port, const char *str);
@@ -90,7 +88,7 @@ static struct data_struct data_struct;
 
 
 
-
+/// disse 3 linjer skal nok fjernes
 u32_t test_addr = 2114037952; //126.1.168.192
 u32_t *aptr = &test_addr;
 u16_t test_port = 73;
@@ -124,18 +122,15 @@ void send_msg(const ip_addr_t *addr, u16_t port, const char *str)
   struct pbuf *p;
   u16_t *payload;
 
-
-
- p = pbuf_alloc(PBUF_TRANSPORT, (u16_t)(str_length), PBUF_RAM);
+  //p = pbuf_alloc(PBUF_RAW, (u16_t)(str_length), PBUF_RAM);
+  p = pbuf_alloc(PBUF_TRANSPORT, (u16_t)(str_length), PBUF_RAM);
   if (p == NULL) {
     return;
   }
 
  payload = (u16_t *) p->payload;
-  /*
-  payload[0] = PP_HTONS(TFTP_ERROR);
-  payload[1] = lwip_htons(code);
-  */
+
+
   MEMCPY(&payload[0], str, str_length);
 
  udp_sendto(data_struct.upcb, p, addr, port);
@@ -143,37 +138,20 @@ void send_msg(const ip_addr_t *addr, u16_t port, const char *str)
 }
 
 
-typedef struct {
-	u8_t addrr;
-    u8_t op1;
-    int op2;
-    u16_t value;
-} UdpPack;
+
 
 static void
 recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
 
-	// int cnter = 0;
-	// ip_addr_t toaddr;
-	// toaddr.addr = 0xff01a8c0;
-    jsonlen = p->len;
 
-	UdpPack *sbuf = (UdpPack*) p->payload;
 
-	char jsonfile[p->len +1];
-	snprintf(jsonfile, p->len, "%s", (char*)p->payload);
-	jsonfile[p->len] = 0;
-    str_ptr = p->payload;
-
+	char *str_msg;
 	cntr = 0;
     rot_cnt = 0;
     GoZeroFlag = 0;
     LWIP_UNUSED_ARG(arg);
     LWIP_UNUSED_ARG(upcb);
-
-    //int bla;
-    //maincpp();
 
     int* checkip = ip_current_src_addr();
 
@@ -183,76 +161,53 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 
     if(ip_addr_isbroadcast(ip_current_dest_addr(), ip_current_netif()) == 1){
 
-    	//char* cJsonArray;
-    	//cJsonArray = sendB_info(1);
-
      	send_msg(addr, 73, makeCharB_info(1));
-
-
-    	//free(cJsonArray);
-
-    	// HUSK DEALLOC
-
-
 
    }
    else if(*checkip == 2114037952){
-	   jsonHandler(jsonfile);
-   }
-   else{
-	   if(sbuf -> addrr == 1){
 
-		}
-		else if(sbuf -> addrr == 2){
-			if(sbuf->op1 == 2){
+	   //send_msg(addr, 73, makeCharMsg(cmd_parser(p->payload, p->len)));
+	   if(strlen("Command = StepM") == strlen(cmd_parser(p->payload, p->len))){
+		   char* whatsthis = (cmd_parser(p->payload, p->len));
+			if( goZero == 1 ){
 				ReturnToZero();
+				send_msg(addr, 73, makeCharMsg("going home"));
 			}
 			else{
-
-			rot_deg = roundf(sbuf->op2 * 1.111)*8;
-			calcPeriod(sbuf->value);
-
-			direction(sbuf->op1);
-
-
+				rot_deg = round(degrees * 1.111)*8;
+				calcPeriod(rpm);
+				direction(direc);
+				int sz = (strlen("Degrees = , RPM = , Direction = ")+strlen(degrees)+strlen(rpm)+strlen(direc));
+				str_msg = (char *) malloc(sizeof(char) * sz);
+				sprintf(str_msg, "Degrees = %d, RPM = %d, Direction = %d", degrees, rpm, direc);
+				send_msg(addr, 73, makeCharMsg(str_msg));
+			    free(str_msg);
 			}
-		}
-		else if(sbuf -> addrr == 3){
+
+	   }
+	   else if (strlen("Command = LED") == strlen(cmd_parser(p->payload, p->len))){
+		   	   	blinkLED(LEDblink);
+				int sz = strlen("LED blinks = ") + strlen(LEDblink);
+				str_msg = (char *) malloc(sizeof(char) * sz);
+				sprintf(str_msg, "LED blinks = %d", LEDblink);
+				send_msg(addr, 73, makeCharMsg(str_msg));
+				free(str_msg);
+
+	   }
 
 
-
-
-			//send_msg(addr, port, "Gaffel sensor");
-		}
-		else if(sbuf -> addrr == 4){
-			//__HAL_TIM_GET_COUNTER(&htim5);
-			sprintf(rota, "Rotations : %lu", __HAL_TIM_GET_COUNTER(&htim5));
-			//send_msg(addr, port, sendMsg(rota));
-			HAL_TIM_Base_Stop(&htim5);
-			__HAL_TIM_SET_COUNTER(&htim5, 0);
-
-		}
-		else if(sbuf -> addrr == 9){
-			sprintf(rota, "48 MHz timer count : %lu", __HAL_TIM_GET_COUNTER(&htim5));
-			//send_msg(addr, port, sendMsg(rota));
-			HAL_TIM_Base_Stop(&htim5);
-			__HAL_TIM_SET_COUNTER(&htim5, 0);
-			 HAL_TIM_Base_Stop_IT(&htim2);
-		   __HAL_TIM_SET_COUNTER(&htim2, 0);
-
-		}
+   }
 
 		else{
-		  send_msg(addr, port, "Invalid key. Try again");
-		  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7);
+		  send_msg(addr, 73, makeCharMsg("error message"));
 		}
 
-	}
-    toggles = 0;
+
+
     pbuf_free(p);
 }
 
-
+ /// Ryd op og ændre navn på funk
 err_t
 tftp_init()
 {
@@ -278,16 +233,24 @@ tftp_init()
 
 
 
+void blinkLED(int blinks){
+	for(int i = 0; i < blinks; i++){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7); //find ny pin til dette
+		HAL_Delay(500);
+	}
+}
+
+
 void direction(u8_t dir)
 {
 
 	if(dir == 1)
 	{
-	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_SET);
 	}
 	if(dir == 0)
 	{
-	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
+	  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_RESET);
 	}
 	HAL_TIM_Base_Start_IT(&htim2);
 }
@@ -296,36 +259,36 @@ void direction(u8_t dir)
 
 
 
-
+/// Ryd op
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	/*if(htim == &htim5){
-		__HAL_TIM_GET_COUNTER(&htim5);
-		HAL_TIM_Base_Stop_IT(&htim5);
-	}*/
+
+
     if (htim==&htim2){
         if(GoZeroFlag == 1){
-        	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_9);
+        	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7);
 			cntr = 0;
         }
         else
         {
-            HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_9);
+            HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7);
             cntr++;
 
            if(RPMGlobal > 300){
         	   if(rampD_flag != true && cntr % 10 == 0){
-
-                           if(PeriodGlobal > Period){
-                           	 //PeriodGlobal --;
-                        	   PeriodGlobal *= 0.999;
-                           	 top_counter = cntr;
-                           }
-                           else if(PeriodGlobal <= Period){
-                           	rampD_flag = true;
-                           }
-                           __HAL_TIM_SET_COUNTER(&htim2, 0);
-                           __HAL_TIM_SET_AUTORELOAD(&htim2,PeriodGlobal);
+        		   //de-acceleration hvis PeriodGlobal opnår
+				   if(PeriodGlobal > Period){
+					 //PeriodGlobal --;
+					 PeriodGlobal *= 0.999;
+					 top_counter = cntr;
+				   }
+				   //
+				   else if(PeriodGlobal <= Period){
+					rampD_flag = true;
+				   }
+				   __HAL_TIM_SET_COUNTER(&htim2, 0);
+				   __HAL_TIM_SET_AUTORELOAD(&htim2,PeriodGlobal);
         	   }
+        	   //accelerer
         	   else if(rampD_flag == true){
         		   if(cntr % 10 == 0){
         			  if(cntr > (rot_deg - top_counter)){
@@ -339,7 +302,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 
        }
-
+// cntr bliver inkrementeret for hvert step og når equality er opnået stoppes motor.
 	   if (cntr == rot_deg){
 			HAL_TIM_Base_Stop_IT(&htim2);
 			__HAL_TIM_SET_COUNTER(&htim2, 0);
@@ -355,18 +318,19 @@ void calcPeriod(u16_t RPM){
     //PeriodGlobal = Period;
     if(RPM > 300){
         PeriodGlobal = 15000;
+        //hvis RPM er for høj til at starte step motor sættes perioden til tælleperioden til 15000
         __HAL_TIM_SET_AUTORELOAD(&htim2,PeriodGlobal);
         RPMGlobal = RPM;
     } else {
         __HAL_TIM_SET_AUTORELOAD(&htim2,Period);
-        RPMGlobal = RPM;
+        RPMGlobal = RPM; // skal formentlig fjernes, da den ikke er brugbar her
     }
 }
 
 
-
+// få den til at virke
 void ReturnToZero(){
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_SET);
     __HAL_TIM_SET_AUTORELOAD(&htim2,70000);
     HAL_TIM_Base_Start_IT(&htim2);
     GoZeroFlag = 1;

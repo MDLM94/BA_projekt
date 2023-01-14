@@ -37,7 +37,6 @@
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
- extern char rota[200];
  extern uint rot_cnt;
  extern int flaggo;
  extern bool stop_IT_flag;

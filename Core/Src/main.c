@@ -27,7 +27,6 @@
 /* USER CODE BEGIN Includes */
 #include "lwIP_adin2111_app.h"
 #include "lwip/timeouts.h"
-#include "tcp_server.h"
 #include "json.h"
 #include "udp_tester.h"
 /* USER CODE END Includes */
@@ -89,7 +88,29 @@ int main(void)
   DEBUG_RESULT("BSP_InitSystem", error, 0);
 
   BSP_HWReset(true);
+#if switch_board_1 == 1
+  boardDetails.mac[0] =	0x00;
+  boardDetails.mac[1] =	0xE0;
+  boardDetails.mac[2] =	0x22;
+  boardDetails.mac[3] =	0xFE;
+  boardDetails.mac[4] =	0xDA;
+  boardDetails.mac[5] =	0xB9; //0xC9 for 2nd board
 
+  boardDetails.ip_addr[0] =   192;
+  boardDetails.ip_addr[1] =   168;
+  boardDetails.ip_addr[2] =   1;
+  boardDetails.ip_addr[3] =   123; //123 for 2nd board
+
+  boardDetails.net_mask[0] =  255;
+  boardDetails.net_mask[1] =  255;
+  boardDetails.net_mask[2] =  255;
+  boardDetails.net_mask[3] =  0;
+
+  boardDetails.gateway[0] =   192;
+  boardDetails.gateway[1] =   168;
+  boardDetails.gateway[2] =   1;
+  boardDetails.gateway[3] =   1;
+#elif switch_board_2 == 1
   boardDetails.mac[0] =	0x00;
   boardDetails.mac[1] =	0xE0;
   boardDetails.mac[2] =	0x22;
@@ -111,7 +132,7 @@ int main(void)
   boardDetails.gateway[1] =   168;
   boardDetails.gateway[2] =   1;
   boardDetails.gateway[3] =   1;
-
+#endif
   boardDetails.ip_addr_fixed = IP_FIXED; //IP_DYNAMIC;
 
   error = discoveradin2111(&hDevice);

@@ -7,7 +7,7 @@
 
 #include "json.h"
 #include "testcpp_json.h"
-
+char rota[200];
 //using namespace std;
 //#include "string.h"
 //#include ""
@@ -111,7 +111,7 @@ void jsonHandler(char jsarray[]) {
 				else if(strncmp(command, "LEDinit",strlen("LED"))==0){
 					snprintf(rota, strlen("Command:  ")+strlen("LED")+1, "Command:  %s", command);
 					char msg = makeCharMsg(rota);
-					send_msg(ip_current_src_addr(), server_port, msg);
+					send_msg(ip_current_src_addr(), server_port, makeCharMsg(rota));
 					//næste funktion
 
 					handleLED();
@@ -140,22 +140,22 @@ void handleRunMotor(void){
 	/* Find custom key in JSON */
 	if((t = lwjson_find(&lwjson, "_params.RPM")) != NULL){
 		calcPeriod(lwjson_get_val_int(t));
-		sprintf(rota, "Key found with data. RPM: %d", (int)lwjson_get_val_int(t));
-		sprintf(rota, *rota + " type: %s", t->type);
-		send_msg(ip_current_src_addr(), server_port, rota);
+		sprintf(rota, "Key found with data: RPM: %d", (int)lwjson_get_val_int(t));
+		//sprintf(rota, *rota + " type: %s", t->type);
+		send_msg(ip_current_src_addr(), server_port, makeCharMsg(rota));
 	}
 
 	if ((t = lwjson_find(&lwjson, "_params.deg")) != NULL) {
 		//printf("Key found with data type: %d\r\n", (int)t->type);
 		rot_deg = roundf(lwjson_get_val_int(t) * 1.111)*8;
-		sprintf(rota, "Key found with data. Distance: %d", (int)lwjson_get_val_int(t));
-		send_msg(ip_current_src_addr(), server_port, rota);
+		sprintf(rota, "Key found with data: Distance: %d", (int)lwjson_get_val_int(t));
+		send_msg(ip_current_src_addr(), server_port, makeCharMsg(rota));
 	}
 
 	if((t = lwjson_find(&lwjson, "_params.dir")) != NULL){
 		direction(lwjson_get_val_int(t));
-		sprintf(rota, "Key found with data. Direction: %d", (int)lwjson_get_val_int(t));
-		send_msg(ip_current_src_addr(), server_port, rota);
+		sprintf(rota, "Key found with data: Direction: %d", (int)lwjson_get_val_int(t));
+		send_msg(ip_current_src_addr(), server_port, makeCharMsg(rota));
 	}
 
 }
@@ -170,7 +170,7 @@ void handleLED(void){
 		sprintf(rota, "Key found with data. LED toggles: %d", (int)lwjson_get_val_int(t));
 		send_msg(ip_current_src_addr(), server_port, rota);
 		for(int i=0; i < (int)lwjson_get_val_int(t); i++){
-		                   HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_13); // A7
+		                   HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7); // A7
 		                   HAL_Delay(500);
 		               }
 	}

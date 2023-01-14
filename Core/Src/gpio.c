@@ -35,7 +35,8 @@ static          ADI_CB gpfIntCallback = NULL;
 static void     *gpIntCBParam = NULL;
 /* USER CODE END 0 */
 uint rot_cnt = 0;
-char rota[200];
+
+
 
 bool stop_IT_flag = false;
 /*----------------------------------------------------------------------------*/
@@ -97,22 +98,23 @@ void GPIO_Init(void)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 
-    /* SETUP BY ANDERS
-    Configure GPIO pin : PG14 DEBUG2 PIN */
-    GPIO_InitStruct.Pin = GPIO_PIN_14;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-    /*Configure GPIO pin : PG13 DEBUG PIN*/
-    GPIO_InitStruct.Pin = GPIO_PIN_13;
+//    Configure GPIO pin : PG14 DEBUG1 PIN
+    GPIO_InitStruct.Pin = GPIO_PIN_14;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
-    /* SETUP BY ANDERS
 
-    Configure GPIO pin : PtPin */
+    //Configure GPIO pin : PG13 DEBUG PIN 2*/
+    GPIO_InitStruct.Pin = GPIO_PIN_13;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+
+    //Configure GPIO pin : PtPin
     HAL_GPIO_WritePin(ETH_RESET_GPIO_Port, ETH_RESET_Pin, GPIO_PIN_SET);
     GPIO_InitStruct.Pin = ETH_RESET_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -232,16 +234,20 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         (*gpfIntCallback)(gpIntCBParam, 0, NULL);
     }
   }
-  if(GPIO_Pin == GPIO_PIN_14){
+  if(GPIO_Pin == GPIO_PIN_13){
 	  //rot_cnt++;
       //__HAL_TIM_SET_COUNTER(&htim5, 0);
 		// HAL_TIM_Base_Start(&htim5);
 	  //HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_13);
-    if(GoZeroFlag == 1){
-       HAL_TIM_Base_Stop_IT(&htim2);
-        __HAL_TIM_SET_COUNTER(&htim2, 0);
-        GoZeroFlag = 0;
-    }
+
+	    if( GoZeroFlag == 1 ){
+	       HAL_TIM_Base_Stop_IT(&htim2);
+	        __HAL_TIM_SET_COUNTER(&htim2, 0);
+	        GoZeroFlag = 0;
+
+	    }
+
+
   }
 
 }

@@ -10,8 +10,8 @@
 
 
 //defines
-#define STEPMOTOR 1
-#define LED 1
-#define PUMPMOTOR 0
+#define switch_board_1 1
+#define switch_board_2 0
+
 
 #endif /* INC_DEFINES_H_ */
