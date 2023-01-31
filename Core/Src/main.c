@@ -76,7 +76,7 @@ int main(void)
   /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
   uint32_t       error;
-   uint32_t       heartbeatCheckTime = 0;
+  uint32_t       heartbeatCheckTime = 0;
   adin2111_DeviceStruct_t dev;
   adin2111_DeviceHandle_t hDevice = &dev;
   LwIP_ADIN2111_t myConn;

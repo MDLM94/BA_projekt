@@ -257,6 +257,7 @@ void ETH_INT_N_IRQ_HANDLER(void)
 
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
@@ -276,6 +277,10 @@ void TIM2_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim2);
 }
 
+void TIM5_IRQHandler(void)
+{
+  HAL_TIM_IRQHandler(&htim5);
+}
 
 
 /* USER CODE END 1 */

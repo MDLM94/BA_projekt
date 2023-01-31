@@ -52,31 +52,15 @@ float rot_deg = 0;
 int cntr = 0;
 u8_t GoZeroFlag;
 int globalRot = 0;
-/*struct tftp_state {
-  const struct tftp_context *ctx;
-  void *handle;
-  struct pbuf *last_data;
-  struct udp_pcb *upcb;
-  ip_addr_t addr;
-  u16_t port;
-  int timer;
-  int last_pkt;
-  u16_t blknum;
-  u8_t retries;
-  u8_t mode_write;
-};*/
+
 int toggles = 0;
 char toggle_cnt[15];
-//void send_msg(const ip_addr_t *addr, u16_t port, const char *str);
+
 void blinkLED(int blinks);
 void direction(u8_t dir);
 void calcPeriod(u16_t RPM);
 void send_msg(const ip_addr_t *addr, u16_t port, const char *str);
 
-//void delay(uint16_t us);
-//static struct tftp_state tftp_state;
-
-//static void tftp_tmr(void *arg);
 
 
 
@@ -135,6 +119,7 @@ void send_msg(const ip_addr_t *addr, u16_t port, const char *str)
 
  udp_sendto(data_struct.upcb, p, addr, port);
   pbuf_free(p);
+
 }
 
 
@@ -146,65 +131,77 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 
 
 
-	char *str_msg;
+	//char *str_msg;
 	cntr = 0;
     rot_cnt = 0;
     GoZeroFlag = 0;
     LWIP_UNUSED_ARG(arg);
     LWIP_UNUSED_ARG(upcb);
 
-    int* checkip = ip_current_src_addr();
+    //int* checkip = ip_current_src_addr();
+
+   char stri_msg[1472];
+   char* command = cmd_parser(p->payload, p->len);
+   char* charmsg;
+   char* b_info_msg;
 
 
-
-
-
+    // hvis broadcast
     if(ip_addr_isbroadcast(ip_current_dest_addr(), ip_current_netif()) == 1){
-
-     	send_msg(addr, 73, makeCharB_info(1));
+    	b_info_msg = makeCharB_info(1);
+     	send_msg(addr, 73, b_info_msg);
+     	free(b_info_msg);
 
    }
-   else if(*checkip == 2114037952){
-
+   //else if(*checkip == 2114037952){
+   else{
 	   //send_msg(addr, 73, makeCharMsg(cmd_parser(p->payload, p->len)));
-	   if(strlen("Command = StepM") == strlen(cmd_parser(p->payload, p->len))){
-		   char* whatsthis = (cmd_parser(p->payload, p->len));
+	   ///strcmp
+
+	   if( strcmp("StepM", command) == 0){
 			if( goZero == 1 ){
 				ReturnToZero();
-				send_msg(addr, 73, makeCharMsg("going home"));
+				charmsg =  makeCharMsg("Returning to reference point");
+				send_msg(addr, 73, charmsg);
 			}
 			else{
 				rot_deg = round(degrees * 1.111)*8;
 				calcPeriod(rpm);
 				direction(direc);
-				int sz = (strlen("Degrees = , RPM = , Direction = ")+strlen(degrees)+strlen(rpm)+strlen(direc));
-				str_msg = (char *) malloc(sizeof(char) * sz);
-				sprintf(str_msg, "Degrees = %d, RPM = %d, Direction = %d", degrees, rpm, direc);
-				send_msg(addr, 73, makeCharMsg(str_msg));
-			    free(str_msg);
+				sprintf(stri_msg, "Degrees = %d, RPM = %d, Direction = %d", degrees, rpm, direc);
+			    charmsg = makeCharMsg(stri_msg);
+				send_msg(addr, 73, charmsg);
+
 			}
 
 	   }
-	   else if (strlen("Command = LED") == strlen(cmd_parser(p->payload, p->len))){
-		   	   	blinkLED(LEDblink);
-				int sz = strlen("LED blinks = ") + strlen(LEDblink);
-				str_msg = (char *) malloc(sizeof(char) * sz);
-				sprintf(str_msg, "LED blinks = %d", LEDblink);
-				send_msg(addr, 73, makeCharMsg(str_msg));
-				free(str_msg);
+	   else if ( strcmp("LED", command) == 0 ){
+				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+				  __HAL_TIM_SET_COUNTER(&htim5, 0);
+				  __HAL_TIM_SET_AUTORELOAD(&htim5,96000000);
+					HAL_TIM_Base_Start_IT(&htim5);
+				sprintf(stri_msg, "LED on for %d seconds", LEDblink);
+				 charmsg = makeCharMsg(stri_msg);
+				send_msg(addr, 73, charmsg);
+				//blinkLED(LEDblink);
+//#if switch_board_2 == 1
 
+//#endif
+
+
+	   }
+	   else{
+		   send_msg(addr, 73, makeCharMsg("Uknown command"));
 	   }
 
 
    }
 
-		else{
-		  send_msg(addr, 73, makeCharMsg("error message"));
-		}
 
-
-
+    free(charmsg);
+	free(command);
     pbuf_free(p);
+
 }
 
  /// Ryd op og ændre navn på funk
@@ -233,11 +230,14 @@ tftp_init()
 
 
 
+
 void blinkLED(int blinks){
-	for(int i = 0; i < blinks; i++){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7); //find ny pin til dette
-		HAL_Delay(500);
-	}
+
+
+	//for(int i = 0; i < blinks; i++){
+		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7); //find ny pin til dette
+		//HAL_Delay(500);
+	//}
 }
 
 
@@ -252,16 +252,29 @@ void direction(u8_t dir)
 	{
 	  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_RESET);
 	}
+#if switch_board_1 == 1
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+#endif
 	HAL_TIM_Base_Start_IT(&htim2);
 }
 
 
 
 
-
+int led_ctr = 0;
 /// Ryd op
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-
+#if switch_board_2 == 1
+	if(htim == &htim5){
+		led_ctr++;
+		if(led_ctr == LEDblink){
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+			HAL_TIM_Base_Stop_IT(&htim5);
+			__HAL_TIM_SET_COUNTER(&htim5, 0);
+			led_ctr = 0;
+		}
+	}
+#endif
 
     if (htim==&htim2){
         if(GoZeroFlag == 1){
@@ -275,7 +288,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
            if(RPMGlobal > 300){
         	   if(rampD_flag != true && cntr % 10 == 0){
-        		   //de-acceleration hvis PeriodGlobal opnår
+        		   //accelerer
 				   if(PeriodGlobal > Period){
 					 //PeriodGlobal --;
 					 PeriodGlobal *= 0.999;
@@ -288,7 +301,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				   __HAL_TIM_SET_COUNTER(&htim2, 0);
 				   __HAL_TIM_SET_AUTORELOAD(&htim2,PeriodGlobal);
         	   }
-        	   //accelerer
+        	   //de-accelerer
         	   else if(rampD_flag == true){
         		   if(cntr % 10 == 0){
         			  if(cntr > (rot_deg - top_counter)){
@@ -307,6 +320,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			HAL_TIM_Base_Stop_IT(&htim2);
 			__HAL_TIM_SET_COUNTER(&htim2, 0);
 			rampD_flag = false;
+#if switch_board_1 == 1
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+#endif
 	   }
     }
   }
@@ -314,7 +330,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 
 void calcPeriod(u16_t RPM){
-    Period = 48000000.0/((RPM/60.0)*1600.0);
+   // Period = 48000000.0/((RPM/60.0)*1600.0);
+    Period = 96000000.0/((RPM/60.0)*3200.0);
     //PeriodGlobal = Period;
     if(RPM > 300){
         PeriodGlobal = 15000;
@@ -330,6 +347,9 @@ void calcPeriod(u16_t RPM){
 
 // få den til at virke
 void ReturnToZero(){
+#if	switch_board_1 == 1
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+#endif
 	HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_SET);
     __HAL_TIM_SET_AUTORELOAD(&htim2,70000);
     HAL_TIM_Base_Start_IT(&htim2);

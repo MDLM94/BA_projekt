@@ -7,7 +7,7 @@
 #include "defines.h"
 #include "gpio.h"
 
-char jsonArray[300];
+//char jsonArray[300];
 Json::Value devices;
 
 int rpm;
@@ -52,11 +52,11 @@ char* cmd_parser(char* udp_msg, int msg_len){
 	const std::string checkValue = root["command"].asString();
 	std::string msg;
 	if(checkValue == "StepM"){
-		msg = "Command = " + checkValue;
+		msg = checkValue;
 		handleRunMotor(root);
 	}
 	else if(checkValue == "LED"){
-		msg = "Command = " + checkValue;
+		msg = checkValue;
 		LEDblink = root["_params"]["toggles"].asInt();
 	}
 
@@ -88,11 +88,10 @@ void add_LED(std::string name, int dev_nr, int min, int max){
 }
 
 
-char* makeCharMsg(char msg[]/*, std::string b_name*/){
+char* makeCharMsg(char* msg){
 
 	std::string json_file;
 
-//	  Json::Value board;
 	Json::Value board;
 
     board["msgType"] = 1;
@@ -127,7 +126,6 @@ char* makeCharB_info(int b_nr/*, std::string b_name*/){
     devices["b_name"] = "StepBoard_2";
 #endif
     devices["b_id"] = b_nr;
-    //devices["b_IP"] = "192.168.1.123";
     //hvis ingen value er assignet vil array være tomt
     devices["devices"]["stepMs"] = Json::arrayValue;;
     devices["devices"]["leds"] = Json::arrayValue;;

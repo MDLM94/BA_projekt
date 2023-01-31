@@ -27,7 +27,7 @@
 #include "string.h"
 #include "tim.h"
 #include "udp_tester.h"
-
+#include "defines.h"
 /* USER CODE BEGIN 0 */
 
 /* Store the IRQ callback and user parameter locally */
@@ -108,7 +108,7 @@ void GPIO_Init(void)
 
     //Configure GPIO pin : PG13 DEBUG PIN 2*/
     GPIO_InitStruct.Pin = GPIO_PIN_13;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
@@ -244,11 +244,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	       HAL_TIM_Base_Stop_IT(&htim2);
 	        __HAL_TIM_SET_COUNTER(&htim2, 0);
 	        GoZeroFlag = 0;
+#if switch_board_1 == 1
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+#endif
 
 	    }
 
 
   }
+  if(GPIO_Pin == GPIO_PIN_9){
+
+	}
 
 }
 
