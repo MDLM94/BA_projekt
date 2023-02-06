@@ -23,21 +23,7 @@
 
 
 
-/*
-enum tftp_error {
-  TFTP_ERROR_FILE_NOT_FOUND    = 1,
-  TFTP_ERROR_ACCESS_VIOLATION  = 2,
-  TFTP_ERROR_DISK_FULL         = 3,
-  TFTP_ERROR_ILLEGAL_OPERATION = 4,
-  TFTP_ERROR_UNKNOWN_TRFR_ID   = 5,
-  TFTP_ERROR_FILE_EXISTS       = 6,
-  TFTP_ERROR_NO_SUCH_USER      = 7
-};
-*/
 
-/* LwJSON instance and tokens */
-//static lwjson_token_t tokens[128];
-//static lwjson_t lwjson;
 
 bool ARR_flag = false;
 bool rampD_flag = false;
@@ -52,7 +38,7 @@ float rot_deg = 0;
 int cntr = 0;
 u8_t GoZeroFlag;
 int globalRot = 0;
-
+int limit_flag = 0;
 int toggles = 0;
 char toggle_cnt[15];
 
@@ -73,32 +59,11 @@ static struct data_struct data_struct;
 
 
 /// disse 3 linjer skal nok fjernes
-u32_t test_addr = 2114037952; //126.1.168.192
-u32_t *aptr = &test_addr;
-u16_t test_port = 73;
+//u32_t test_addr = 2114037952; //126.1.168.192
+//u32_t *aptr = &test_addr;
+//u16_t test_port = 73;
 
-/*
-///////////////////////////////////////////////////////////////
-void send_test_msg(u32_t *t_address, u16_t t_port, char *str){
-  int str_length = strlen(str);
-  struct pbuf *p;
-  u16_t *payload;
 
-  p = pbuf_alloc(PBUF_TRANSPORT, (u16_t)(str_length), PBUF_RAM);
-   if (p == NULL) {
-     return;
-   }
-
-  payload = (u16_t *) p->payload;
-
-  MEMCPY(&payload[0], str, str_length);
-
-  udp_sendto(data_struct.upcb, p, t_address, t_port);
-   pbuf_free(p);
-}
-
-/////////////////////////////////////////////////////////////
-*/
 void send_msg(const ip_addr_t *addr, u16_t port, const char *str)
 {
 
@@ -140,9 +105,7 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 
     //int* checkip = ip_current_src_addr();
 
-   char stri_msg[1472];
    char* command = cmd_parser(p->payload, p->len);
-   char* charmsg;
    char* b_info_msg;
 
 
@@ -161,16 +124,19 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 	   if( strcmp("StepM", command) == 0){
 			if( goZero == 1 ){
 				ReturnToZero();
-				charmsg =  makeCharMsg("Returning to reference point");
+				char* charmsg =  makeCharMsg("Returning to reference point");
 				send_msg(addr, 73, charmsg);
+				free(charmsg);
 			}
 			else{
 				rot_deg = round(degrees * 1.111)*8;
 				calcPeriod(rpm);
 				direction(direc);
+			    char stri_msg[1472];
 				sprintf(stri_msg, "Degrees = %d, RPM = %d, Direction = %d", degrees, rpm, direc);
-			    charmsg = makeCharMsg(stri_msg);
+				char* charmsg = makeCharMsg(stri_msg);
 				send_msg(addr, 73, charmsg);
+				free(charmsg);
 
 			}
 
@@ -180,10 +146,12 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 				  __HAL_TIM_SET_COUNTER(&htim5, 0);
 				  __HAL_TIM_SET_AUTORELOAD(&htim5,96000000);
 					HAL_TIM_Base_Start_IT(&htim5);
+			    char stri_msg[1472];
 				sprintf(stri_msg, "LED on for %d seconds", LEDblink);
-				 charmsg = makeCharMsg(stri_msg);
+				 char* charmsg = makeCharMsg(stri_msg);
 				send_msg(addr, 73, charmsg);
-				//blinkLED(LEDblink);
+				free(charmsg);
+
 //#if switch_board_2 == 1
 
 //#endif
@@ -191,22 +159,36 @@ recv(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16
 
 	   }
 	   else{
-		   send_msg(addr, 73, makeCharMsg("Uknown command"));
+		   char stri_msg[1472];
+
+		 /*  if(limit_flag == 1){
+			   sprintf(stri_msg, "Antal pakker modtaget = %d", limit_cnt);
+
+			   char* charmsg = makeCharMsg(stri_msg);
+			   send_msg(addr, 73, charmsg);
+			   free(charmsg);
+			   limit_flag = 0;
+
+			   lim_counter = 0;
+		   }*/
+		   char* charmsg = makeCharMsg("Uknown command");
+		   free(charmsg);
+
+
 	   }
 
 
    }
 
 
-    free(charmsg);
 	free(command);
     pbuf_free(p);
 
 }
 
- /// Ryd op og ændre navn på funk
+
 err_t
-tftp_init()
+SPE_data_init()
 {
   err_t ret;
 
@@ -275,6 +257,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		}
 	}
 #endif
+	//limit test
+	/*if (htim==&htim5){
+		limit_flag = 1;
+	   HAL_TIM_Base_Stop_IT(&htim5);
+	   __HAL_TIM_SET_COUNTER(&htim5, 0);
+	}*/
 
     if (htim==&htim2){
         if(GoZeroFlag == 1){
@@ -340,7 +328,7 @@ void calcPeriod(u16_t RPM){
         RPMGlobal = RPM;
     } else {
         __HAL_TIM_SET_AUTORELOAD(&htim2,Period);
-        RPMGlobal = RPM; // skal formentlig fjernes, da den ikke er brugbar her
+        RPMGlobal = RPM;
     }
 }
 

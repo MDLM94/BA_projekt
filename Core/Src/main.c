@@ -76,6 +76,7 @@ int main(void)
   /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
   uint32_t       error;
+
   uint32_t       heartbeatCheckTime = 0;
   adin2111_DeviceStruct_t dev;
   adin2111_DeviceHandle_t hDevice = &dev;
@@ -148,7 +149,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  tftp_init();
+  SPE_data_init();
   MX_TIM2_Init();
   MX_TIM5_Init();
 

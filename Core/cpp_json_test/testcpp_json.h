@@ -10,6 +10,7 @@ extern int degrees;
 extern int direc;
 extern int goZero;
 extern int LEDblink;
+extern int limit_cnt;
 int maincpp();
 //int add_dev(char* devName);
 char* makeCharB_info(int b_nr);

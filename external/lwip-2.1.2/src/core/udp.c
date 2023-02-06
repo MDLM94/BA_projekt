@@ -62,7 +62,7 @@
 #include "lwip/stats.h"
 #include "lwip/snmp.h"
 #include "lwip/dhcp.h"
-
+#include "tim.h"
 #include <string.h>
 
 #ifndef UDP_LOCAL_PORT_RANGE_START
@@ -190,9 +190,16 @@ udp_input_local_match(struct udp_pcb *pcb, struct netif *inp, u8_t broadcast)
  * @param inp network interface on which the datagram was received.
  *
  */
+int lim_counter = 0;
 void
 udp_input(struct pbuf *p, struct netif *inp)
 {
+	//del af limit test
+	/*if (lim_counter == 0){
+		HAL_TIM_Base_Start_IT(&htim5);
+		lim_counter++;
+	}*/
+
   struct udp_hdr *udphdr;
   struct udp_pcb *pcb, *prev;
   struct udp_pcb *uncon_pcb;

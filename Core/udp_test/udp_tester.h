@@ -26,7 +26,7 @@ void calcPeriod(u16_t RPM);
 void ReturnToZero(void);
 void sent_that_shet(void);
 extern void send_msg(const ip_addr_t *addr, u16_t port, const char *str);
-
+err_t SPE_data_init();
 extern u8_t GoZeroFlag;
 /** @ingroup tftp
 * TFTP context containing callback functions for TFTP transfers

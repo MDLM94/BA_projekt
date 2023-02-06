@@ -60,6 +60,8 @@ extern "C" {
 
 struct udp_pcb;
 
+//limit test variable
+//extern int lim_counter;
 /** Function prototype for udp pcb receive callback functions
  * addr and port are in same byte order as in the pcb
  * The callback is responsible for freeing the pbuf

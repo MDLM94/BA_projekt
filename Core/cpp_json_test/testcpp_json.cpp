@@ -15,6 +15,12 @@ int degrees;
 int direc;
 int LEDblink;
 int goZero;
+//int limit_cnt; // limit test var
+//limit test funk
+/*
+void limit_test(Json::Value root){
+	limit_cnt = root["count"].asInt();
+}*/
 
 void handleRunMotor(Json::Value root){
 
@@ -59,6 +65,9 @@ char* cmd_parser(char* udp_msg, int msg_len){
 		msg = checkValue;
 		LEDblink = root["_params"]["toggles"].asInt();
 	}
+	/*else{ //limit test
+		limit_test(root);
+	}*/
 
 	return strdup( msg.c_str());
 }
@@ -111,7 +120,7 @@ char* makeCharMsg(char* msg){
 
 }
 
-char* makeCharB_info(int b_nr/*, std::string b_name*/){
+char* makeCharB_info(int b_nr){
 
 	std::string json_file;
 
@@ -132,21 +141,14 @@ char* makeCharB_info(int b_nr/*, std::string b_name*/){
 #if switch_board_1 == 1
     add_stepM("Jytte", 1, 1, 1500);
     add_stepM("Henning", 2, 1, 1500);
-    add_LED("Ronaldo", 1, 1, 40000);
+   // add_LED("Ronaldo", 1, 1, 40000);
 #elif switch_board_2 == 1
     add_stepM("FIC1", 1, 1, 1000);
     add_stepM("FIC2", 2, 1, 1200);
     add_LED("FIC3", 1, 1, 3000);
 #endif
 
-
-
-
-//	board["Devices"] = devices;
-	//board["B_info"] = b_Info;
 	board["payload"] = devices;
-
-
 
 	Json::FastWriter writer;
 	json_file = writer.write(board);
